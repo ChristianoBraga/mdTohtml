@@ -190,3 +190,7 @@ def toHtml(tl):
     html += "\n</html>"
     return html
 ```
+1. Se a maioria dos tokens têm uma tradução quase literal à HTML, cuidado particular deve ser tomado com relação as itemizações e enumerações. Não é possível escrever uma expressão regular que capture todas as itemizações (ou enumerações) de uma vez pois este problema se reduz ao problema do balanceamento de parênteses que não é regular. (Veremos isso ao falarmos do lema do bombeamento para linguagens regulares.)
+2. Sua implementação deve refinar o arquivo `mdlexer.py` no repositório e sua execução passando o arquivo `teste.md` como parâmetro deve produzir o código HTML acima na saída padrão do sistema, quando executado de um console.
+
+Boa sorte e divirtam-se!

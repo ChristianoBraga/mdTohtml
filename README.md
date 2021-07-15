@@ -2,6 +2,8 @@
 
 Trabalho para a disciplina de Linguagens Formais, 2021.1
 
+Data de entrega: 23/07/21
+
 ## Objetivo
 
 Exercitar o uso de expressões regulares.
@@ -15,7 +17,7 @@ Implementar um tradutor de uma simplificação da linguagem Markdown para HTML e
 * Instale Python 3 com o pacote PLY. 
   - Com Python 3 instalado no seu sistema, execute `$ pip3 install PLY`.
 
-## A linguagem Markdown simplificada 
+## A linguagem Markdown simplificada e sua tradução à HTML
 
 - Permite a escrita de documentos como por exemplo:
 ```
@@ -40,7 +42,6 @@ teste paragrafo 1, teste paragrafo 2
 
 - A tradução para HTML deve produzir:
 ```
-   The [6]current development sources have the latest version of Lynx
 <html>
 <h1>Teste h1 </h1>
 <p>
@@ -78,8 +79,114 @@ teste paragrafo 1, teste paragrafo 2
    <li>E isto também.
    </ul>
    ```
+5. Enumerações. Linhas iniciadas com `1.` determinam um item numa lista ordenada em HTML. Por exemplo, o texto Markdown abaixo     
+   ```
+   1. Isto é um item.
+   1. E isto também.
+   ``` 
+   deve ser traduzido ao código HTML abaixo.
+   ```
+   <ol>
+   <li>Isto é um item.
+   <li>E isto também.
+   </ol>
+   ```
+6. Links. Um link em Markdown simplificado `[Google](http://www.google.com)` deve ser traduzido à `<a href="http://www.google.com">Google</a>`.
 
+## Um exemplo
 
+- O tradutor deve ser implementado em Python 3 utilizando a biblioteca PLY. Ela implementa analisadores léxicos através de expressões regulares e analisadores sintáticos através de gramática livres de contexto. Para este trabalho utilizaremos somente o suporte à análise léxica.
 
+- Os principais elementos do analisador são a lista de tokens e as regras que definem as expressões regulares e que darão origem aos lexemas. No exemplo abaixo há somente um token chamado `WORD` e a expressão regular que reconhece `WORD` é dada por repetições de caracters, números e `,`, indefinidamente. A função principal cria o lexer e o invoca com a string `Ola mundo`. O resultado é o seguinte:
+`[LexToken(WORD,'Ola',1,0), LexToken(WORD,'mundo',1,4)]`.
 
+```python3
+import ply.lex as lex
 
+tokens = [
+    'WORD'
+]
+
+t_ignore  = ' \t\n'
+
+def t_WORD(t):
+    r'[a-zA-Z0-9,]+'
+    return t
+
+def t_error(t):
+    print("Illegal character '%s'" % t.value[0])
+
+class Lexer:
+    def __init__(self):
+        self.lexer = lex.lex()
+
+    def setData(self, data):
+        self.data = data
+        self.lexer.input(data)
+
+    def tokenize(self):
+        tokens = []
+        while True:
+            tok = self.lexer.token()
+            if not tok:
+                break
+            tokens.append(tok)
+        return tokens
+
+if __name__ == '__main__':
+    lex = Lexer()
+    lex.setData("Ola mundo")
+    t = lex.tokenize()
+    print(t)
+```
+
+## Implementação
+
+1. Seu analisador léxico deve definir os seguintes tokens.
+```python
+tokens = [
+    'HEADER',
+    'WORD',
+    'BOLD',
+    'ITALIC',
+    'NEWLINE',
+    'LINK',
+    'ENUM',
+    'ITEM',
+    'PARAGRAPH'
+]
+```
+1. Para cada token deve haver uma regra que define uma expressão regular que reconheça o token associado segundo a definição informal acima.
+2. Voce deve definir também a função `toHtml` que dada uma lista de tokens produza uma string contendo a tradução de Markdwon simplificado para HTML. A estrutura da função é a seguinte, que basicamente acumula a tradução de cada token à HTML na variável `html` e depois a retorna.
+```python
+def toHtml(tl):
+    html = "<html>"
+    # ...
+    for t in tl:
+        if t.type == 'ITEM':
+            # ...
+            html += # ...
+        if t.type == 'ENUM':
+            # ...           
+            html += # ...
+        if t.type == 'HEADER':
+            # ...
+            html += # ...
+        if t.type == 'PARAGRAPH':
+            # ...
+            html += # ...
+        if t.type == 'WORD':
+            # ...
+            html += # ...
+        if t.type == 'BOLD':
+            # ...
+            html += # ...
+        if t.type == 'ITALIC':
+            # ...
+            html += # ...
+        if t.type == 'LINK':
+            # ...
+            html += # ...
+    html += "\n</html>"
+    return html
+```
